@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Dashboard</title>
+  <style>
+    /* styles.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 400px;
+  padding: 20px;
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.input-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  width: 70%;
+  padding: 10px;
+  background-color: #333333;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  outline: none;
+}
+
+button {
+  width: 25%;
+  padding: 10px;
+  background-color: #6200ea;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #3700b3;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  background-color: #333333;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+li:hover {
+  background-color: #6200ea;
+}
+
+#weather-container {
+  background-color: #333333;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+  </style>
+
+
+  </head>
+  <body>
+    <div class="container">
+      <h1>Weather Dashboard</h1>
+      <div class="input-container">
+        <input type="text" id="city-input" placeholder="Enter city name" />
+        <button id="add-city-btn">Add City</button>
+      </div>
+
+      <h2>Saved Cities</h2>
+      <ul id="city-list">
+        <!-- Cities will be dynamically added here -->
+      </ul>
+
+      <h2>Weather Info</h2>
+      <div id="weather-container">
+        <p>Select a city to view its weather information.</p>
+      </div>
+    </div>
+    <script>
+      
+document.addEventListener("DOMContentLoaded", () => {
+  const API_KEY = "5f56d525d1619d0a2cd2eac4ce55588e"; // Replace with your OpenWeather API Key
+  const cityInput = document.getElementById("city-input");
+  const addCityBtn = document.getElementById("add-city-btn");
+  const cityList = document.getElementById("city-list");
+  const weatherContainer = document.getElementById("weather-container");
+
+  let cities = JSON.parse(localStorage.getItem("cities")) || [];
+
+  
+  renderCities();
+
+  
+  addCityBtn.addEventListener("click", () => {
+    const city = cityInput.value.trim();
+    if (city && !cities.includes(city)) {
+      cities.push(city);
+      saveCities();
+      renderCities();
+    }
+    cityInput.value = ""; 
+  });
+
+ 
+  cityList.addEventListener("click", async (e) => {
+    if (e.target.tagName === "LI") {
+      const city = e.target.textContent;
+      const weatherData = await fetchWeatherData(city);
+      displayWeather(weatherData);
+    }
+  });
+
+
+  function renderCities() {
+    cityList.innerHTML = ""; 
+    cities.forEach((city) => {
+      const li = document.createElement("li");
+      li.textContent = city;
+      cityList.appendChild(li);
+    });
+  }
+
+ 
+  async function fetchWeatherData(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      alert("City not found!");
+      return;
+    }
+    const data = await response.json();
+    return data;
+  }
+
+ 
+  function displayWeather(data) {
+    weatherContainer.innerHTML = `
+            <h3>${data.name}</h3>
+            <p>Temperature: ${data.main.temp}°C</p>
+            <p>Weather: ${data.weather[0].description}</p>
+        `;
+  }
+
+
+  function saveCities() {
+    localStorage.setItem("cities", JSON.stringify(cities));
+  }
+});
+
+    </script>
+  </body>
+</html>
